@@ -1,0 +1,6 @@
+apiVersion: v2
+name: zs-postgres-local
+description: A Helm chart for local postgres on kubernetes cluster for testing and development
+type: application
+version: 0.1.0
+appVersion: "0.1.0"

@@ -1,0 +1,112 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "zs-postgres-local.fullname" . }}
+  labels:
+    {{- include "zs-postgres-local.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "zs-postgres-local.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "zs-postgres-local.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "zs-postgres-local.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                configMapKeyRef:
+                  key: postgresUser
+                  name: {{ .Release.Name }}-configmap
+
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  key: postgresDatabase
+                  name: {{ .Release.Name }}-configmap
+
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: postgresPassword
+                  name: {{ .Release.Name }}-secret
+
+            {{- if .Values.postgres.volume.enabled}}
+            - name: PGDATA
+              valueFrom:
+                configMapKeyRef:
+                  key: postgresDataPath
+                  name: {{ .Release.Name }}-configmap
+            {{- end}}
+          
+          {{- if .Values.postgres.volume.enabled}}
+          volumeMounts:
+            - name: pgdata
+              mountPath: {{.Values.postgres.volume.mountPath}}
+          {{- end}}
+
+          ports:
+            - name: postgres
+              containerPort: 5432
+              protocol: TCP
+          readinessProbe: 
+            initialDelaySeconds: 2 
+            periodSeconds: 2 
+            timeoutSeconds: 2
+            successThreshold: 1 
+            failureThreshold: 5 
+            exec:
+              command:
+              - pg_isready 
+          livenessProbe:
+            initialDelaySeconds: 2 
+            periodSeconds: 2 
+            timeoutSeconds: 2
+            successThreshold: 1 
+            failureThreshold: 5 
+            exec:
+              command:
+              - pg_isready 
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+
+      {{- if .Values.postgres.volume.enabled}}
+      volumes:
+        - name: pgdata
+          hostPath:
+            path: {{ .Values.postgres.volume.hostPath}}
+            type: DirectoryOrCreate
+      {{- end}}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-configmap
+data:
+  postgresUser: {{ .Values.postgres.username }}
+  postgresDatabase: {{ .Values.postgres.database }}
+  postgresDataPath: {{ .Values.postgres.volume.mountPath }}
