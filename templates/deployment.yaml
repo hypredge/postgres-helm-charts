@@ -52,7 +52,7 @@ spec:
                   key: postgresPassword
                   name: {{ .Release.Name }}-secret
 
-            {{- if .Values.postgres.volume.enabled}}
+            {{- if .Values.volume.enabled}}
             - name: PGDATA
               valueFrom:
                 configMapKeyRef:
@@ -60,10 +60,10 @@ spec:
                   name: {{ .Release.Name }}-configmap
             {{- end}}
           
-          {{- if .Values.postgres.volume.enabled}}
+          {{- if .Values.volume.enabled}}
           volumeMounts:
             - name: pgdata
-              mountPath: {{.Values.postgres.volume.mountPath}}
+              mountPath: {{.Values.volume.mountPath}}
           {{- end}}
 
           ports:
@@ -91,11 +91,11 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
 
-      {{- if .Values.postgres.volume.enabled}}
+      {{- if .Values.volume.enabled}}
       volumes:
         - name: pgdata
           hostPath:
-            path: {{ .Values.postgres.volume.hostPath}}
+            path: {{ .Values.volume.hostPath}}
             type: DirectoryOrCreate
       {{- end}}
       {{- with .Values.nodeSelector }}

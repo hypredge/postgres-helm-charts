@@ -4,14 +4,14 @@
 
 replicaCount: 1
 
-postgres:
-  username: sa
-  password: welcome
-  database: testDb
-  volume:
-    enabled: true
-    hostPath: _HOST_PATH_
-    mountPath: /var/lib/postgresql/data 
+
+username: sa
+password: welcome
+database: testDb
+volume:
+  enabled: true
+  hostPath: /Users/sdas/pgdata
+  mountPath: /var/lib/postgresql/data 
 
 image:
   repository: postgres
