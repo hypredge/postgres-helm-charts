@@ -1,0 +1,53 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-temporal-schema-setup
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name }}
+    helm.sh/chart: {{ .Chart.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion | replace "+" "_" }}
+    app.kubernetes.io/component: database
+    app.kubernetes.io/part-of: {{ .Chart.Name }}
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-delete-policy": hook-succeeded,hook-failed
+spec:
+  backoffLimit: {{ .Values.schema.backoffLimit }}
+  template:
+    metadata:
+      name: {{ .Release.Name }}-temporal-schema-setup
+      labels:
+        app.kubernetes.io/name: {{ .Release.Name }}
+        helm.sh/chart: {{ .Chart.Name }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/version: {{ .Chart.AppVersion | replace "+" "_" }}
+        app.kubernetes.io/component: database
+        app.kubernetes.io/part-of: {{ .Chart.Name }}
+    spec:
+      restartPolicy: "OnFailure"
+      initContainers:
+        - name: check-postgres-service
+          image: postgres
+          command: ['sh', '-c', 'until pg_isready -h {{ include "zs-postgres-local.fullname" $ }} -p {{ .Values.service.port }}; do echo waiting for postgres service; sleep 5; done;']
+
+      containers:
+        {{- if .Values.schema }}
+        {{- range $setup := .Values.schema.setup }}
+        - name : {{ $setup.name }}
+          image: "{{ $setup.image }}:{{ $setup.tag }}"        
+          imagePullPolicy: "IfNotPresent"
+          command:
+            {{- range $setup.command }}
+            - {{ . | quote }}
+            {{- end }}
+          env:
+            {{- range $e := $setup.env }}
+            - name : {{ $e.name }}
+              value: {{ tpl $e.value $ | quote }}
+            {{- end }}
+        {{- end }}
+        {{- end }}

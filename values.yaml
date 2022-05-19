@@ -5,12 +5,12 @@
 replicaCount: 1
 
 
-username: _USER_
-password: _PASSWORD_
-database: _DB_
+username: sa
+password: welcome
+database: testDb
 volume:
-  enabled: _ENABLED_
-  hostPath: _HOST_PATH_
+  enabled: false
+  hostPath: /Users/sdas/pgdata
   mountPath: /var/lib/postgresql/data 
 
 image:
@@ -18,6 +18,37 @@ image:
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: latest
+
+
+schema:
+  backoffLimit : 5
+  setup:
+    - name : setup-temporal-database
+      image: temporalio/admin-tools
+      tag: "1.16.2"
+      command:
+        - 'sh'
+        - '-c'
+        - >- 
+          env;
+          temporal-sql-tool create-database -database temporal; 
+          temporal-sql-tool create-database -database temporal_visibility;
+          SQL_DATABASE=temporal temporal-sql-tool setup-schema -v 0.0;
+          SQL_DATABASE=temporal temporal-sql-tool update -schema-dir schema/postgresql/v96/temporal/versioned;
+          SQL_DATABASE=temporal_visibility temporal-sql-tool setup-schema -v 0.0;
+          SQL_DATABASE=temporal_visibility temporal-sql-tool update -schema-dir schema/postgresql/v96/visibility/versioned
+
+      env:
+        - name: SQL_HOST
+          value: '{{ include "zs-postgres-local.fullname" . }}'
+        - name: SQL_PORT
+          value: "{{ .Values.service.port }}"
+        - name: SQL_PLUGIN
+          value: "postgres"
+        - name: SQL_USER
+          value: "{{  .Values.username  }}"
+        - name: SQL_PASSWORD
+          value: "{{ .Values.password }}"
 
 imagePullSecrets: []
 nameOverride: ""
