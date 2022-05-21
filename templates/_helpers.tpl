@@ -23,6 +23,30 @@ If release name contains chart name it will be used as a full name.
 {{- end }}
 {{- end }}
 
+
+{{/*
+  An alias for the postgres port so that we can use it upstream 
+*/}}
+{{- define "zs-postgres-local.port" -}}
+{{ .Values.service.port }}
+{{- end }}
+
+{{/*
+  An alias for the postgres user so that we can use it upstream 
+*/}}
+{{- define "zs-postgres-local.user" -}}
+{{ .Values.username }}
+{{- end }}
+
+{{/*
+  An alias for the postgres password so that we can use it upstream 
+*/}}
+{{- define "zs-postgres-local.password" -}}
+{{ .Values.password }}
+{{- end }}
+
+
+
 {{/*
 Create chart name and version as used by the chart label.
 */}}

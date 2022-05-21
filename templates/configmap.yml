@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Release.Name }}-configmap
+  name: {{ include "zs-postgres-local.fullname" . }}-configmap
 data:
   postgresUser: {{ .Values.username }}
   postgresDatabase: {{ .Values.database }}

@@ -38,26 +38,26 @@ spec:
               valueFrom:
                 configMapKeyRef:
                   key: postgresUser
-                  name: {{ .Release.Name }}-configmap
+                  name: {{ include "zs-postgres-local.fullname" . }}-configmap
 
             - name: POSTGRES_DB
               valueFrom:
                 configMapKeyRef:
                   key: postgresDatabase
-                  name: {{ .Release.Name }}-configmap
+                  name: {{ include "zs-postgres-local.fullname" . }}-configmap
 
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
                   key: postgresPassword
-                  name: {{ .Release.Name }}-secret
+                  name: {{ include "zs-postgres-local.fullname" . }}-secret
 
             {{- if .Values.volume.enabled}}
             - name: PGDATA
               valueFrom:
                 configMapKeyRef:
                   key: postgresDataPath
-                  name: {{ .Release.Name }}-configmap
+                  name: {{ include "zs-postgres-local.fullname" . }}-configmap
             {{- end}}
           
           {{- if .Values.volume.enabled}}
