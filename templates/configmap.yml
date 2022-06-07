@@ -1,3 +1,4 @@
+{{- if ne .Values.service.type "ExternalName" }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -6,3 +7,4 @@ data:
   postgresUser: {{ .Values.username }}
   postgresDatabase: {{ .Values.database }}
   postgresDataPath: {{ .Values.volume.mountPath }}
+{{- end }}

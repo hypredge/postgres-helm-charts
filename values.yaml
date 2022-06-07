@@ -4,10 +4,10 @@
 
 replicaCount: 1
 
-
 username: sa
 password: welcome
 database: testDb
+dnsname: rds.fqdn
 volume:
   enabled: false
   hostPath: /Users/sdas/pgdata
