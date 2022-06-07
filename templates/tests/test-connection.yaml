@@ -11,5 +11,9 @@ spec:
     - name: wget
       image: busybox
       command: ['wget']
+      {{- if ne .Values.service.type "ExternalName" }}
       args: ['{{ include "zs-postgres-local.fullname" . }}:{{ .Values.service.port }}']
+      {{- else }}
+      args: ['{{ .Values.dnsname }}:{{ .Values.service.port }}']      
+      {{- end}}
   restartPolicy: Never
