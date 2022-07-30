@@ -75,20 +75,20 @@ spec:
               containerPort: 5432
               protocol: TCP
           readinessProbe: 
-            initialDelaySeconds: 2 
-            periodSeconds: 2 
-            timeoutSeconds: 2
+            initialDelaySeconds: 5 
+            periodSeconds: 10 
+            timeoutSeconds: 5
             successThreshold: 1 
-            failureThreshold: 5 
+            failureThreshold: 6 
             exec:
               command:
               - pg_isready 
           livenessProbe:
-            initialDelaySeconds: 2 
-            periodSeconds: 2 
-            timeoutSeconds: 2
+            initialDelaySeconds: 5 
+            periodSeconds: 10 
+            timeoutSeconds: 5
             successThreshold: 1 
-            failureThreshold: 5 
+            failureThreshold: 6
             exec:
               command:
               - pg_isready 
